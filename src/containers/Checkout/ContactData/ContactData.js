@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import Button from '../../../components/UI/Button/Button';
 import classes from './ContactData.css';
 import axios from '../../../axios-order';
@@ -46,7 +47,8 @@ class ContactData extends Component{
                 validation: {
                     required: true,
                     minLength: 5,
-                    maxLength: 5
+                    maxLength: 5,
+                    isNumeric: true
                 },
                 valid: false,
                 touched: false
@@ -72,7 +74,8 @@ class ContactData extends Component{
                 },
                 value: '',
                 validation: {
-                    required: true
+                    required: true,
+                    isEmail: true
                 },
                 valid: false,
                 touched: false
@@ -107,7 +110,7 @@ class ContactData extends Component{
         }
 
         const order = {
-            ingredients: this.props.ingredients,
+            ingredients: this.props.ings,
             price: this.props.price,
             orderData: formData
         }
@@ -129,6 +132,11 @@ class ContactData extends Component{
     checkValidation( value, rules ){
 
         let isValid = true;
+
+        if(!rules) {
+            return true;
+        }
+
         if( rules.required ){
             isValid = value.trim() !== '' && isValid  ;
         }
@@ -139,6 +147,16 @@ class ContactData extends Component{
 
         if( rules.maxLength ){
             isValid = value.length <= rules.maxLength && isValid;
+        }
+
+        if( rules.isNumeric ){
+            const pattern = /^\d+$/;
+            isValid = pattern.test( value ) && isValid;
+        }
+
+        if( rules.isEmail ){
+            const pattern = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+            isValid = pattern.test( value ) && isValid;
         }
 
         return isValid;
@@ -211,4 +229,11 @@ class ContactData extends Component{
     }
 }
 
-export default ContactData;
+const mapStateToProps = state => {
+    return {
+        ings: state.ingredients,
+        price: state.totalPrice
+    }
+};
+
+export default connect( mapStateToProps )( ContactData );
